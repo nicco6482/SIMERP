@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusERP 2026 — Enterprise OS</title>
+  <meta name="description" content="NexusERP 2026 — Sistema ERP Enterprise de próxima generación.">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+  <div id="app">
+    <!-- ── Sidebar ─────────────────────────────────── -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">N</div>
+        <div class="brand-text">
+          <div class="brand-name">NexusERP</div>
+          <div class="brand-sub">Enterprise OS 2026</div>
+        </div>
+      </div>
+
+      <div class="sidebar-nav">
+        <div class="nav-section-label">Core</div>
+        <div class="nav-item active" data-key="dashboard" onclick="navigate('dashboard')">
+          <i data-lucide="layout-dashboard" class="nav-icon"></i>Dashboard
+        </div>
+        <div class="nav-item" data-key="inventory" onclick="navigate('inventory')">
+          <i data-lucide="package" class="nav-icon"></i>Inventario
+          <span class="nav-badge">3</span>
+        </div>
+        <div class="nav-item" data-key="crm" onclick="navigate('crm')">
+          <i data-lucide="users" class="nav-icon"></i>CRM
+        </div>
+        <div class="nav-item" data-key="accounting" onclick="navigate('accounting')">
+          <i data-lucide="receipt" class="nav-icon"></i>Contabilidad
+        </div>
+        <div class="nav-item" data-key="hr" onclick="navigate('hr')">
+          <i data-lucide="briefcase" class="nav-icon"></i>RRHH
+        </div>
+        <div class="nav-item" data-key="purchasing" onclick="navigate('purchasing')">
+          <i data-lucide="shopping-cart" class="nav-icon"></i>Compras
+          <span class="nav-badge">1</span>
+        </div>
+
+        <div class="nav-section-label">Operaciones</div>
+        <div class="nav-item" data-key="production" onclick="navigate('production')">
+          <i data-lucide="cpu" class="nav-icon"></i>Producción
+        </div>
+        <div class="nav-item" data-key="logistics" onclick="navigate('logistics')">
+          <i data-lucide="truck" class="nav-icon"></i>Logística
+          <span class="nav-badge">!</span>
+        </div>
+
+        <div class="nav-section-label">Inteligencia</div>
+        <div class="nav-item" data-key="analytics" onclick="navigate('analytics')">
+          <i data-lucide="bar-chart-2" class="nav-icon"></i>Analytics &amp; BI
+        </div>
+        <div class="nav-item" data-key="schema" onclick="navigate('schema')">
+          <i data-lucide="database" class="nav-icon"></i>ERD &amp; API Schema
+        </div>
+        <div class="nav-item" data-key="flow" onclick="navigate('flow')">
+          <i data-lucide="git-branch" class="nav-icon"></i>Arq. &amp; Roadmap
+        </div>
+
+        <div class="nav-section-label">Sistema</div>
+        <div class="nav-item" data-key="settings" onclick="navigate('settings')">
+          <i data-lucide="settings" class="nav-icon"></i>Configuración
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-card" onclick="navigate('settings')">
+          <div class="user-avatar">CE</div>
+          <div>
+            <div class="user-name">Carlos Ejecutivo</div>
+            <div class="user-role">Super Admin · CEO</div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── Main ───────────────────────────────────── -->
+    <div class="main">
+      <header class="topbar">
+        <button class="topbar-btn" onclick="toggleSidebar()" id="menu-btn" style="display:none">
+          <i data-lucide="menu" style="width:16px;height:16px"></i>
+        </button>
+        <div style="font-size:.85rem;font-weight:600;color:var(--text-primary)" id="topbar-title">Dashboard</div>
+        <div class="topbar-spacer"></div>
+
+        <!-- Global Search -->
+        <div style="position:relative">
+          <div class="topbar-search">
+            <i data-lucide="search" style="width:14px;height:14px;color:var(--text-muted);flex-shrink:0"></i>
+            <input type="text" placeholder="Buscar en NexusERP… (Ctrl+K)" id="global-search-input"
+              oninput="handleGlobalSearch(this.value)"
+              onfocus="document.getElementById('search-results').style.display='block'"
+              onblur="setTimeout(()=>{document.getElementById('search-results').style.display='none'},220)">
+          </div>
+          <div id="search-results" style="
+          position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
+          width:460px;max-width:90vw;
+          background:var(--bg-overlay);border:1px solid var(--border-default);
+          border-radius:var(--r-xl);box-shadow:var(--shadow-xl);
+          display:none;z-index:300;overflow:hidden;
+          max-height:380px;overflow-y:auto;
+        ">
+            <div id="search-results-inner" style="padding:5px"></div>
+          </div>
+        </div>
+
+        <div class="topbar-btn" onclick="openNotificationsPanel()" title="Notificaciones" id="notif-btn">
+          <i data-lucide="bell" style="width:16px;height:16px"></i>
+          <span class="dot" id="notif-dot"></span>
+        </div>
+        <div class="topbar-btn" onclick="navigate('settings')" title="Configuración">
+          <i data-lucide="settings" style="width:16px;height:16px"></i>
+        </div>
+      </header>
+
+      <main class="content" id="module-content"></main>
+    </div>
+  </div>
+
+  <!-- ── FAB ────────────────────────────────────── -->
+  <div id="fab-container"
+    style="position:fixed;bottom:24px;right:24px;z-index:400;display:flex;flex-direction:column-reverse;align-items:flex-end;gap:8px">
+    <div id="fab-actions"
+      style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s">
+      <!-- Filled by JS below -->
+    </div>
+    <button id="fab-main" onclick="toggleFAB()" title="Acciones rápidas" style="
+    width:48px;height:48px;border-radius:14px;
+    background:linear-gradient(135deg,var(--accent),var(--purple));
+    border:none;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;box-shadow:0 8px 24px rgba(99,102,241,.4);
+    color:#fff;transition:all .2s;">
+      <i data-lucide="plus" id="fab-icon" style="width:20px;height:20px;transition:transform .2s"></i>
+    </button>
+  </div>
+
+  <!-- ── Scripts ─────────────────────────────── -->
+  <script src="js/data.js"></script>
+  <script src="js/modules/dashboard.js"></script>
+  <script src="js/modules/inventory.js"></script>
+  <script src="js/modules/crm.js"></script>
+  <script src="js/modules/accounting.js"></script>
+  <script src="js/modules/hr.js"></script>
+  <script src="js/modules/purchasing.js"></script>
+  <script src="js/modules/production.js"></script>
+  <script src="js/modules/logistics.js"></script>
+  <script src="js/modules/analytics.js"></script>
+  <script src="js/modules/settings.js"></script>
+  <script src="js/modules/schema.js"></script>
+  <script src="js/modules/flow.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    // ── Responsive ──────────────────────────────
+    if (window.innerWidth <= 900) {
+      document.getElementById('menu-btn').style.display = 'flex';
+    }
+
+    // ── Build FAB actions ──────────────────────
+    const fabItems = [
+      { icon: 'file-plus', label: 'Nueva Factura', mod: 'accounting' },
+      { icon: 'user-plus', label: 'Nuevo Cliente', mod: 'crm' },
+      { icon: 'package', label: 'Ajustar Stock', mod: 'inventory' },
+      { icon: 'shopping-cart', label: 'Nueva OC', mod: 'purchasing' },
+      { icon: 'clipboard-list', label: 'Nueva OF', mod: 'production' },
+    ];
+    const fabActionsEl = document.getElementById('fab-actions');
+    fabActionsEl.innerHTML = fabItems.map(item => `
+  <div style="display:flex;align-items:center;gap:8px">
+    <span style="background:var(--bg-overlay);padding:4px 12px;border-radius:var(--r-md);font-size:.75rem;color:var(--text-primary);border:1px solid var(--border-default);white-space:nowrap;box-shadow:var(--shadow-sm)">${item.label}</span>
+    <button onclick="navigate('${item.mod}');showToast('${item.label}','${item.icon}','var(--green)')" style="width:36px;height:36px;border-radius:var(--r-md);background:var(--bg-elevated);border:1px solid var(--border-default);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--accent);transition:all .15s;box-shadow:var(--shadow-xs)"
+      onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-dim)'"
+      onmouseout="this.style.borderColor='var(--border-default)';this.style.background='var(--bg-elevated)'">
+      <i data-lucide="${item.icon}" style="width:14px;height:14px"></i>
+    </button>
+  </div>`).join('');
+    if (window.lucide) lucide.createIcons();
+
+    // ── FAB toggle ─────────────────────────────
+    let fabOpen = false;
+    function toggleFAB() {
+      fabOpen = !fabOpen;
+      const actions = document.getElementById('fab-actions');
+      const icon = document.getElementById('fab-icon');
+      const btn = document.getElementById('fab-main');
+      actions.style.opacity = fabOpen ? '1' : '0';
+      actions.style.pointerEvents = fabOpen ? 'all' : 'none';
+      actions.style.transform = fabOpen ? 'translateY(0)' : 'translateY(8px)';
+      icon.style.transform = fabOpen ? 'rotate(45deg)' : 'rotate(0)';
+      btn.style.boxShadow = fabOpen ? '0 8px 32px rgba(99,102,241,.6)' : '0 8px 24px rgba(99,102,241,.4)';
+    }
+    document.addEventListener('click', e => {
+      if (fabOpen && !document.getElementById('fab-container').contains(e.target)) toggleFAB();
+    });
+
+    // ── Global Search ──────────────────────────
+    function handleGlobalSearch(q) {
+      const container = document.getElementById('search-results-inner');
+      q = q.toLowerCase().trim();
+      if (!q) { container.innerHTML = '<div style="padding:18px;text-align:center;color:var(--text-muted);font-size:.8rem">Empieza a escribir para buscar…</div>'; return; }
+
+      const hits = ERP_DATA.searchIndex.filter(item =>
+        item.label.toLowerCase().includes(q) || (item.sub && item.sub.toLowerCase().includes(q))
+      ).slice(0, 10);
+
+      const modColors = { inventory: 'var(--green)', crm: 'var(--blue)', accounting: 'var(--amber)', hr: 'var(--purple)', purchasing: 'var(--amber)', production: 'var(--cyan)', logistics: 'var(--teal)', analytics: 'var(--accent)' };
+      const modIcons = { inventory: 'package', crm: 'users', accounting: 'receipt', hr: 'briefcase', purchasing: 'shopping-cart', production: 'cpu', logistics: 'truck', analytics: 'bar-chart-2' };
+
+      if (!hits.length) {
+        container.innerHTML = '<div style="padding:18px;text-align:center;color:var(--text-muted);font-size:.8rem">Sin resultados para "' + q + '"</div>';
+        return;
+      }
+
+      container.innerHTML = hits.map(h => `
+    <div onclick="(${h.action.toString()})()" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r-md);cursor:pointer;transition:background .12s"
+      onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='transparent'">
+      <div style="width:28px;height:28px;border-radius:var(--r-md);background:${modColors[h.module] || 'var(--accent)'}18;display:flex;align-items:center;justify-content:center;color:${modColors[h.module] || 'var(--accent)'};flex-shrink:0">
+        <i data-lucide="${modIcons[h.module] || 'hash'}" style="width:13px;height:13px"></i>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.8rem;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.label}</div>
+        <div style="font-size:.7rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.sub || ''}</div>
+      </div>
+      <span style="font-size:.65rem;color:${modColors[h.module] || 'var(--accent)'};background:${modColors[h.module] || 'var(--accent)'}15;padding:2px 7px;border-radius:20px;white-space:nowrap;border:1px solid ${modColors[h.module] || 'var(--accent)'}25">${h.module}</span>
+    </div>`).join('');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // ── Cmd/Ctrl+K shortcut ─────────────────────
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        const inp = document.getElementById('global-search-input');
+        inp.focus();
+        document.getElementById('search-results').style.display = 'block';
+        document.getElementById('search-results-inner').innerHTML = '<div style="padding:18px;text-align:center;color:var(--text-muted);font-size:.8rem">Empieza a escribir para buscar…</div>';
+      }
+    });
+
+    // ── Notification Center ─────────────────────
+    function openNotificationsPanel() {
+      const unread = ERP_DATA.notifications.filter(n => !n.read).length;
+      const sevColor = { high: 'var(--red)', med: 'var(--amber)', low: 'var(--blue)', ok: 'var(--green)' };
+      const html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <span style="font-size:.75rem;color:var(--text-muted)">${unread} sin leer</span>
+      <button class="btn btn-glass" style="padding:4px 10px;font-size:.72rem"
+        onclick="ERP_DATA.notifications.forEach(n=>n.read=true);document.getElementById('notif-dot').style.display='none';showToast('Todas marcadas como leídas','check','var(--green)');closePanel()">
+        Marcar todo leído
+      </button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      ${ERP_DATA.notifications.map(n => `
+        <div onclick="closePanel();navigate('${n.module || 'dashboard'}')" style="
+          display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--r-md);cursor:pointer;
+          background:${n.read ? 'transparent' : 'rgba(99,102,241,.04)'};
+          border:1px solid ${n.read ? 'var(--border-subtle)' : 'rgba(99,102,241,.12)'};
+          transition:all .15s"
+          onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background='${n.read ? 'transparent' : 'rgba(99,102,241,.04)'}'">
+          <div class="alert-dot ${n.sev === 'high' ? 'high' : n.sev === 'med' ? 'med' : n.sev === 'low' ? 'low' : 'ok'}" style="margin-top:4px;flex-shrink:0"></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:.8rem;font-weight:${n.read ? 500 : 600};color:var(--text-primary);line-height:1.4">${n.title}</div>
+            <div style="font-size:.73rem;color:var(--text-secondary);margin-top:2px;line-height:1.5">${n.body}</div>
+            <div style="font-size:.68rem;color:var(--text-muted);margin-top:4px">${n.time}</div>
+          </div>
+          <i data-lucide="chevron-right" style="width:13px;height:13px;color:var(--text-muted);flex-shrink:0;margin-top:2px"></i>
+        </div>`).join('')}
+    </div>`;
+
+      openPanel(html, 'Notificaciones', `${unread} alertas sin leer`, 'var(--amber)', 'bell');
+      if (window.lucide) lucide.createIcons();
+    }
+  </script>
+</body>
+
+</html>
